@@ -3,7 +3,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              tools:context=".MainActivity">
+              tools:context=".PhotoGridActivity">
 
     <include
         layout="@layout/toolbar"
@@ -11,10 +11,9 @@
         android:layout_height="wrap_content"
         />
 
-    <com.adamwilson.common.thumbnailgrid.ThumbnailGridView
-        android:id="@+id/thumbnail_grid_view"
+    <GridView
+        android:id="@+id/photo_grid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

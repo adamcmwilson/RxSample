@@ -1,13 +1,92 @@
 package com.adamwilson.rxsample;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity {
+import com.adamwilson.common.api.photos.ObservablePhotosProvider;
+import com.adamwilson.common.api.photos.PhotosAPIProvider;
+import com.adamwilson.common.model.Photo;
+import com.adamwilson.common.rx.AndroidIOTransformer;
+import com.adamwilson.common.thumbnailgrid.ThumbnailGridView;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import rx.Observer;
+import rx.Subscription;
+
+public class MainActivity extends Activity implements Observer<Integer> {
+
+
+    @Bind(R.id.toolbar)             Toolbar           toolbar;
+    @Bind(R.id.thumbnail_grid_view) ThumbnailGridView grid;
+
+    private Subscription photosApiSubscription;
+    private Subscription gridItemSelectionSubscription;
+
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ButterKnife.setDebug(BuildConfig.DEBUG);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+
+        setActionBar(toolbar);
+
+        if (grid == null) throw new RuntimeException("Grid is Null...");
+
+        photosApiSubscription = ObservablePhotosProvider.getInstance()
+                                                        .observePhotos()
+                                                        .compose(new AndroidIOTransformer<List<Photo>>())
+                                                        .subscribe(grid.asObserver());
+
+        ObservablePhotosProvider.getInstance().get(36, PhotosAPIProvider.getExcludedCategories());
+    }
+
+    private void observeGridItemSelections() {
+        gridItemSelectionSubscription =
+                grid.observeSelectedItem().subscribe(this);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        observeGridItemSelections();
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+
+        if (photosApiSubscription != null) {
+            photosApiSubscription.unsubscribe();
+        }
+    }
+
+    @Override public void onNext(Integer startPosition) {
+        gridItemSelectionSubscription.unsubscribe();
+        Intent intent = DetailPagerActivity.getStartIntent(this, grid.getItems(), startPosition);
+        this.startActivityForResult(intent, DetailPagerActivity.REQUEST_CODE);
+    }
+
+    @Override public void onError(Throwable e) { }
+
+    @Override public void onCompleted() { }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case DetailPagerActivity.REQUEST_CODE:
+                switch (resultCode) {
+                    case RESULT_OK:
+                        int returnPosition = data.getExtras()
+                                                 .getInt(DetailPagerActivity.KEY_RETURN_POSITION);
+
+                        grid.scrollTo(returnPosition);
+                        observeGridItemSelections();
+                        break;
+                }
+                finishActivity(DetailPagerActivity.REQUEST_CODE);
+                break;
+        }
     }
 }
