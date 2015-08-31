@@ -13,4 +13,6 @@ public interface ObsPhotosProvider {
     void get(final int count,
              final String excludeCategoryCsv);
 
+    boolean hasItems();
+
 }

@@ -20,7 +20,6 @@ import rx.Subscription;
 
 public class MainActivity extends Activity implements Observer<Integer> {
 
-
     @Bind(R.id.toolbar)             Toolbar           toolbar;
     @Bind(R.id.thumbnail_grid_view) ThumbnailGridView grid;
 
@@ -36,13 +35,6 @@ public class MainActivity extends Activity implements Observer<Integer> {
         setActionBar(toolbar);
 
         if (grid == null) throw new RuntimeException("Grid is Null...");
-
-        photosApiSubscription = ObservablePhotosProvider.getInstance()
-                                                        .observePhotos()
-                                                        .compose(new AndroidIOTransformer<List<Photo>>())
-                                                        .subscribe(grid.asObserver());
-
-        ObservablePhotosProvider.getInstance().get(36, PhotosAPIProvider.getExcludedCategories());
     }
 
     private void observeGridItemSelections() {
@@ -52,7 +44,18 @@ public class MainActivity extends Activity implements Observer<Integer> {
 
     @Override protected void onResume() {
         super.onResume();
+
         observeGridItemSelections();
+
+        ObservablePhotosProvider provider = ObservablePhotosProvider.getInstance();
+
+        photosApiSubscription = provider.observePhotos()
+                                        .compose(new AndroidIOTransformer<List<Photo>>())
+                                        .subscribe(grid.asObserver());
+
+        if (!provider.hasItems())
+            ObservablePhotosProvider.getInstance().get(
+                    36, PhotosAPIProvider.getExcludedCategories());
     }
 
     @Override protected void onPause() {

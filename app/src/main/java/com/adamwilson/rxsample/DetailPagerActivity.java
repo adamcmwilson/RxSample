@@ -9,12 +9,12 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toolbar;
 
 import com.adamwilson.common.api.ImageSize;
 import com.adamwilson.common.model.Image;
@@ -59,7 +59,7 @@ public class DetailPagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail_pager);
         ButterKnife.bind(this);
 
-        setSupportActionBar(toolbar);
+        setActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);

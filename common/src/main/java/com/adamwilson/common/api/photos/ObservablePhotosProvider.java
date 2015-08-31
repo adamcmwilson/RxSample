@@ -21,6 +21,10 @@ public class ObservablePhotosProvider implements ObsPhotosProvider {
         return instance;
     }
 
+    @Override public boolean hasItems() {
+        return photosSubject.hasValue();
+    }
+
     @Override public Observable<List<Photo>> observePhotos() {
         if (photosSubject == null) {
             this.photosSubject = BehaviorSubject.create();
