@@ -7,7 +7,7 @@ test:
   override:
     - ./gradlew connectedAndroidTest -PdisablePreDex --debug --stacktrace
 deployment:
-  hockeyapp:
-    branch: master
-    commands:
-      - ./hockeyapp_deploy.sh
+    production:
+        branch: master
+        commands:
+            - ./hockeyapp_deploy.sh
